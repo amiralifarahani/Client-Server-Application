@@ -1,4 +1,4 @@
-FROM golang:alpine
+FROM docker.arvancloud.ir/golang:latest
 WORKDIR /app
 COPY go.* ./
 RUN go mod download

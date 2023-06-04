@@ -31,7 +31,7 @@ type Res struct {
 func main() {
 
 	http.HandleFunc("/", grpc2)
-	log.Fatal(http.ListenAndServe(":5000", nil))
+	log.Fatal(http.ListenAndServe(":6000", nil))
 }
 
 func grpc2(w http.ResponseWriter, r *http.Request) {
@@ -59,6 +59,5 @@ func CacheInRedis(key string, value float64) {
 		Password: "",
 		DB:       0,
 	})
-	rdb.Del(ctx, key)
-	rdb.HSet(ctx, key, value, 20*time.Minute)
+	rdb.Set(ctx, key, value, 20*time.Minute)
 }
