@@ -7,8 +7,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"strconv"
-	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -39,13 +37,11 @@ func grpc1(w http.ResponseWriter, r *http.Request) {
 
 	serverNonce := ServerNonceGenerator()
 
+	redis_key := string(sha1.New().Sum([]byte(req.Nonce + serverNonce)))
+
+	CacheInRedis(redis_key, req.Nonce, serverNonce, req.Message_Id+1, 3, 11)
+
 	response := Res{Nonce: req.Nonce, ServerNonce: serverNonce, Message_Id: req.Message_Id + 1, P: 11, G: 3}
-
-	redis_key := string(sha1.New().Sum([]byte(response.Nonce + response.ServerNonce)))
-	redis_value := `nonce: "` + req.Nonce + `", serverNonce: "` + serverNonce + `", message_id: "` + strconv.FormatInt(req.Message_Id+1, 10)  + `", g: "` + strconv.FormatInt(3, 10) + `", p: "` + strconv.FormatInt(11, 10)+`"`
-
-	CacheInRedis(redis_key, redis_value)
-
 	json.NewEncoder(w).Encode(response)
 
 }
@@ -60,11 +56,16 @@ func ServerNonceGenerator() string {
 	return string(b)
 }
 
-func CacheInRedis(key string, value string) {
+func CacheInRedis(key string, nonce string, serverNonce string, message_id int64, g int64, p int64) {
+	ctx := context.Background()
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6380",
 		Password: "",
 		DB:       0,
 	})
-	rdb.Set(context.Background(), key, value, 20*time.Minute)
+	rdb.HSet(ctx, key, "nonce", nonce)
+	rdb.HSet(ctx, key, "serverNonce", serverNonce)
+	rdb.HSet(ctx, key, "message_id", message_id)
+	rdb.HSet(ctx, key, "g", g)
+	rdb.HSet(ctx, key, "p", p)
 }
