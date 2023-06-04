@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -59,7 +60,7 @@ func ServerNonceGenerator() string {
 func CacheInRedis(key string, nonce string, serverNonce string, message_id int64, g int64, p int64) {
 	ctx := context.Background()
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6380",
+		Addr:     os.Getenv("REDIS_ADDR"),
 		Password: "",
 		DB:       0,
 	})
