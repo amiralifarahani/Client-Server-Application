@@ -1,0 +1,19 @@
+syntax = "proto3";
+option go_package = "/pb";
+
+message Request {
+  string nonce = 1;
+  int64 message_id = 2;
+}
+
+message Response {
+  string nonce = 1;
+  string server_nonce = 2;
+  int64 message_id = 3;
+  int64 p = 4;
+  int64 g = 5;
+}
+
+service authentication_service {
+  rpc req_pq(Request) returns (Response) {}
+}
