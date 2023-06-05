@@ -3,53 +3,47 @@ package main
 import (
 	"context"
 	"crypto/sha1"
-	"encoding/json"
 	"log"
 	"math"
 	"math/rand"
-	"net/http"
+	"net"
 	"os"
 	"time"
 
+	"example.com/pb"
 	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc"
 )
 
-type Req struct {
-	Nonce       string `json:"nonce"`
-	ServerNonce string `json:"serverNonce"`
-	Message_Id  int64  `json:"message_id"`
-	A           int64  `json:"a"`
-}
-
-type Res struct {
-	Nonce       string `json:"nonce"`
-	ServerNonce string `json:"serverNonce"`
-	Message_Id  int64  `json:"message_id"`
-	B           int64  `json:"B"`
+type server struct {
+	pb.AuthenticationServiceServer
 }
 
 func main() {
 
-	http.HandleFunc("/", grpc2)
-	log.Fatal(http.ListenAndServe(":6000", nil))
+	listener, err := net.Listen("tcp", ":8080")
+	if err != nil {
+		panic(err)
+	}
+	s := grpc.NewServer()
+	pb.RegisterAuthenticationServiceServer(s, &server{})
+	if err := s.Serve(listener); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }
 
-func grpc2(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	var req Req
-	json.NewDecoder(r.Body).Decode(&req)
-
-	b := rand.Int63n(100)
-	BValue := math.Mod(11, math.Pow(float64(req.A), float64(b)))
-
+func (s *server) Req_DHParams(ctx context.Context, req *pb.Req_DHParams_Request) (*pb.Req_DHParams_Response, error) {
+	
+	BValue := math.Mod(23, math.Pow(float64(req.A), float64(rand.Int63n(100))))
 	redis_key := string(sha1.New().Sum([]byte(req.Nonce + req.ServerNonce)))
-
 	CacheInRedis(redis_key, BValue)
 
-	response := Res{Nonce: req.Nonce, ServerNonce: req.ServerNonce, Message_Id: req.Message_Id + 1, B: int64(BValue)}
-	json.NewEncoder(w).Encode(response)
-
+	return &pb.Req_DHParams_Response{
+		Nonce:       req.Nonce,
+		ServerNonce: req.ServerNonce,
+		MessageId:   req.MessageId + 1,
+		B:           int64(BValue),
+	}, nil
 }
 
 func CacheInRedis(key string, value float64) {

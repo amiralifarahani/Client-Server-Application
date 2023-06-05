@@ -1,12 +1,12 @@
 syntax = "proto3";
 option go_package = "/pb";
 
-message Request {
+message req_pq_Request {
   string nonce = 1;
   int64 message_id = 2;
 }
 
-message Response {
+message req_pq_Response {
   string nonce = 1;
   string server_nonce = 2;
   int64 message_id = 3;
@@ -14,6 +14,6 @@ message Response {
   int64 g = 5;
 }
 
-service authentication_service {
-  rpc req_pq(Request) returns (Response) {}
+service req_pq_authentication_service {
+  rpc req_pq(req_pq_Request) returns (req_pq_Response) {}
 }

@@ -3,48 +3,45 @@ package main
 import (
 	"context"
 	"crypto/sha1"
-	"encoding/json"
+	"fmt"
 	"log"
 	"math/rand"
-	"net/http"
+	"net"
 	"os"
 
+	"example.com/pb"
 	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc"
 )
 
-type Req struct {
-	Nonce      string `json:"nonce"`
-	Message_Id int64  `json:"message_id"`
-}
-
-type Res struct {
-	Nonce       string `json:"nonce"`
-	ServerNonce string `json:"serverNonce"`
-	Message_Id  int64  `json:"message_id"`
-	P           int64  `json:"p"`
-	G           int64  `json:"g"`
+type server struct {
+	pb.ReqPqAuthenticationServiceServer
 }
 
 func main() {
-	http.HandleFunc("/", grpc1)
-	log.Fatal(http.ListenAndServe(":4000", nil))
+	listener, err := net.Listen("tcp", "0.0.0.0:8080")
+	if err != nil {
+		fmt.Print(err)
+	}
+	s := grpc.NewServer()
+	pb.RegisterReqPqAuthenticationServiceServer(s, &server{})
+	if err := s.Serve(listener); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+
 }
 
-func grpc1(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	var req Req
-	json.NewDecoder(r.Body).Decode(&req)
-
-	serverNonce := ServerNonceGenerator()
-
-	redis_key := string(sha1.New().Sum([]byte(req.Nonce + serverNonce)))
-
-	CacheInRedis(redis_key, req.Nonce, serverNonce, req.Message_Id+1, 3, 11)
-
-	response := Res{Nonce: req.Nonce, ServerNonce: serverNonce, Message_Id: req.Message_Id + 1, P: 11, G: 3}
-	json.NewEncoder(w).Encode(response)
-
+func (s *server) ReqPq(ctx context.Context, req *pb.ReqPq_Request) (*pb.ReqPq_Response, error) {
+	sNonce := ServerNonceGenerator()
+	redis_key := string(sha1.New().Sum([]byte(req.Nonce + sNonce)))
+	CacheInRedis(redis_key, req.Nonce, sNonce, req.MessageId+1, 5, 23)
+	return &pb.ReqPq_Response{
+		Nonce:       req.Nonce,
+		ServerNonce: sNonce,
+		MessageId:   req.MessageId + 1,
+		P:           11,
+		G:           3,
+	}, nil
 }
 
 func ServerNonceGenerator() string {
@@ -67,6 +64,6 @@ func CacheInRedis(key string, nonce string, serverNonce string, message_id int64
 	rdb.HSet(ctx, key, "nonce", nonce)
 	rdb.HSet(ctx, key, "serverNonce", serverNonce)
 	rdb.HSet(ctx, key, "message_id", message_id)
-	rdb.HSet(ctx, key, "g", g)
-	rdb.HSet(ctx, key, "p", p)
+	rdb.HSet(ctx, key, "g", 5)
+	rdb.HSet(ctx, key, "p", 23)
 }
