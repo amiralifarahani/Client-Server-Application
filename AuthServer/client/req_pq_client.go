@@ -13,13 +13,13 @@ func main() {
 	fmt.Println("Hello client ...")
 
 	opts := grpc.WithInsecure()
-	cc, err := grpc.Dial("localhost:8080", opts)
+	cc, err := grpc.Dial("localhost:5052", opts)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer cc.Close()
 
-	client := pb.NewReqPqAuthenticationServiceClient(cc)
+	client := pb.NewAuthenticationServiceClient(cc)
 	request := &pb.ReqPq_Request{Nonce: "bardia rezaei kalantari", MessageId: 1823756}
 
 	resp, err := client.ReqPq(context.Background(), request)

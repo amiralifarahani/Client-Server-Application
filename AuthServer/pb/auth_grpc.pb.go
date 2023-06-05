@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.23.2
-// source: req_DH_params.proto
+// source: auth.proto
 
 package pb
 
@@ -19,6 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
+	AuthenticationService_ReqPq_FullMethodName        = "/authentication_service/req_pq"
 	AuthenticationService_Req_DHParams_FullMethodName = "/authentication_service/req_DH_params"
 )
 
@@ -26,6 +27,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthenticationServiceClient interface {
+	ReqPq(ctx context.Context, in *ReqPq_Request, opts ...grpc.CallOption) (*ReqPq_Response, error)
 	Req_DHParams(ctx context.Context, in *Req_DHParams_Request, opts ...grpc.CallOption) (*Req_DHParams_Response, error)
 }
 
@@ -35,6 +37,15 @@ type authenticationServiceClient struct {
 
 func NewAuthenticationServiceClient(cc grpc.ClientConnInterface) AuthenticationServiceClient {
 	return &authenticationServiceClient{cc}
+}
+
+func (c *authenticationServiceClient) ReqPq(ctx context.Context, in *ReqPq_Request, opts ...grpc.CallOption) (*ReqPq_Response, error) {
+	out := new(ReqPq_Response)
+	err := c.cc.Invoke(ctx, AuthenticationService_ReqPq_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *authenticationServiceClient) Req_DHParams(ctx context.Context, in *Req_DHParams_Request, opts ...grpc.CallOption) (*Req_DHParams_Response, error) {
@@ -50,6 +61,7 @@ func (c *authenticationServiceClient) Req_DHParams(ctx context.Context, in *Req_
 // All implementations must embed UnimplementedAuthenticationServiceServer
 // for forward compatibility
 type AuthenticationServiceServer interface {
+	ReqPq(context.Context, *ReqPq_Request) (*ReqPq_Response, error)
 	Req_DHParams(context.Context, *Req_DHParams_Request) (*Req_DHParams_Response, error)
 	mustEmbedUnimplementedAuthenticationServiceServer()
 }
@@ -58,6 +70,9 @@ type AuthenticationServiceServer interface {
 type UnimplementedAuthenticationServiceServer struct {
 }
 
+func (UnimplementedAuthenticationServiceServer) ReqPq(context.Context, *ReqPq_Request) (*ReqPq_Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReqPq not implemented")
+}
 func (UnimplementedAuthenticationServiceServer) Req_DHParams(context.Context, *Req_DHParams_Request) (*Req_DHParams_Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Req_DHParams not implemented")
 }
@@ -72,6 +87,24 @@ type UnsafeAuthenticationServiceServer interface {
 
 func RegisterAuthenticationServiceServer(s grpc.ServiceRegistrar, srv AuthenticationServiceServer) {
 	s.RegisterService(&AuthenticationService_ServiceDesc, srv)
+}
+
+func _AuthenticationService_ReqPq_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReqPq_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthenticationServiceServer).ReqPq(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthenticationService_ReqPq_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthenticationServiceServer).ReqPq(ctx, req.(*ReqPq_Request))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _AuthenticationService_Req_DHParams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -100,10 +133,14 @@ var AuthenticationService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AuthenticationServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "req_pq",
+			Handler:    _AuthenticationService_ReqPq_Handler,
+		},
+		{
 			MethodName: "req_DH_params",
 			Handler:    _AuthenticationService_Req_DHParams_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "req_DH_params.proto",
+	Metadata: "auth.proto",
 }
