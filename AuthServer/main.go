@@ -21,7 +21,7 @@ type server struct {
 }
 
 func main() {
-	listener, err := net.Listen("tcp", ":5052")
+	listener, err := net.Listen("tcp", "0.0.0.0:5052")
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -73,7 +73,7 @@ func ServerNonceGenerator() string {
 func CacheBInRedis(key string, value float64) {
 	ctx := context.Background()
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_ADDR"),
+		Addr:     "redis:6379",
 		Password: "",
 		DB:       0,
 	})
@@ -83,7 +83,7 @@ func CacheBInRedis(key string, value float64) {
 func CacheAllInRedis(key string, nonce string, serverNonce string, message_id int64, g int64, p int64) {
 	ctx := context.Background()
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_ADDR"),
+		Addr:     "redis:6379",
 		Password: "",
 		DB:       0,
 	})
