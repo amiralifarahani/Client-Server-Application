@@ -1,0 +1,75 @@
+// syntax="proto3";
+//
+// package biz_server;
+//
+// option java_multiple_files = true;
+//
+// // option go_package = "./biz_server";
+//
+// option go_package = "web/hw1/biz";
+//
+// message Person {
+//       string name = 1;
+//       int32 age = 2;
+// }
+
+
+
+
+syntax = "proto3";
+
+//option java_multiple_files = true;
+//option go_package = "./";
+option go_package = "web/hw1/biz";
+//option go_package = "web/hw1/biz";
+package auth;
+
+//option go_package = "./";
+
+//import "google/protobuf/timestamp.proto";
+
+service Biz {
+  rpc get_users (get_user_input1) returns (get_user_output) {}
+  rpc get_users_with_sql_injection (get_user_input2) returns (get_user_output) {}
+}
+
+
+message get_user_input1 {
+  int32 user_id = 1;
+  string auth_key = 2;
+  int32 message_id = 3;
+}
+
+message get_user_input2 {
+  string user_id = 1;
+  string auth_key = 2;
+  int32 message_id = 3;
+}
+
+message get_user_output {
+  repeated User user = 1;
+  int32 message_id = 2;
+}
+
+message User {
+  string name = 1;
+  string family = 2;
+  int32 id = 3;
+  int32 age = 4;
+  string sex = 5;
+  int64 createdAt = 6;
+}
+
+//message Req_DH_params_input {
+//  string nonce = 1;
+//  string server_nonce = 2;
+//  int32 message_id = 3;
+//  int32  a = 4;
+//}
+//
+//message Req_DH_params_response {
+//  string nonce = 1;
+//  string server_nonce = 2;
+//  int32 message_id = 3;
+//  int32  b = 4;
+//}
