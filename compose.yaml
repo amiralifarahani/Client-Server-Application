@@ -1,6 +1,6 @@
 services:
   proxy:
-    image: nginx
+    image: nginx:latest
     volumes:
       - type: bind
         source: ./nginx/proxy
@@ -12,16 +12,16 @@ services:
       - gateway
   authserver:
     build:
-      context: ./authserver
+      context: ./AuthServer
       dockerfile: Dockerfile
     ports:
       - 5052:5052
     depends_on:
       - redis
   redis:
-    image: redis:latest
+    image: redis:6-alpine
     ports:
-      - 6379:6379
+      - 6380:6379
   gateway:
     build:
       context: ./gateway
@@ -45,9 +45,9 @@ services:
       - POSTGRES_DB=biz_database
     # network_mode: "host"
   postgres_db:
-    image: postgres:latest
+    image: postgres:14.2
     ports:
-      - 5432:5432
+      - 5433:5432
     environment:
       - POSTGRES_PASSWORD=12345
       - POSTGRES_USER=postgres

@@ -17,6 +17,33 @@ const (
 	dbname   = "biz_database"
 )
 
+// func CreateServer() *fiber.App {
+// 	app := fiber.New()
+
+// 	return app
+// }
+
+// func main() {
+
+// 	//app := CreateServer()
+// 	//
+// 	//app.Use(cors.New())
+// 	//
+// 	//app.Get("/hello", func(c *fiber.Ctx) error {
+// 	//	create_database()
+// 	//	return c.SendString("Hello, World!")
+// 	//})
+// 	//
+// 	//// 404 Handler
+// 	//app.Use(func(c *fiber.Ctx) error {
+// 	//	return c.SendStatus(404) // => 404 "Not Found"
+// 	//})
+// 	//
+// 	//log.Fatal(app.Listen(":3000"))
+
+// 	Create_database()
+// }
+
 func Create_database() {
 
 	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
@@ -56,6 +83,7 @@ func Create_database() {
 	// _, e = db.Exec(insertStmt)
 	// CheckError2(e)
 	defer db.Close()
+
 
 }
 

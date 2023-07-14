@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	gen "main/gen/go"
 	"log"
+	gen "main/gen/go"
 	"net/http"
 	"strings"
 
@@ -31,7 +31,12 @@ func isHeaderAllowed(s string) (string, bool) {
 func TokenAuthMiddleware() gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
-
+		//authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
+		//if len(authorizationHeader) == 0 {
+		//	err := errors.New("authorization header is not provided")
+		//	ctx.AbortWithStatusJSON(http.StatusUnauthorized, err)
+		//	return
+		//}
 		token := ctx.Request.FormValue("auth_key")
 
 		if token == "" {
@@ -117,9 +122,48 @@ func main() {
 	server.Group("/get_users", TokenAuthMiddleware()).Any("", gin.WrapH(mux2))
 	server.Group("/get_users_sql", TokenAuthMiddleware()).Any("", gin.WrapH(mux2))
 
+	//server.GET("/test", func(c *gin.Context) {
+	//	c.String(http.StatusOK, "Ok")
+	//})
+
 	// start server
 	err = server.Run(":6433")
 	if err != nil {
 		log.Fatal(err)
 	}
 }
+
+//package main
+//
+//import (
+//	"context"
+//	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+//	"google.golang.org/grpc"
+//	"log"
+//	"net"
+//	"net/http"
+//)
+//
+//func main() {
+//	// creating mux for gRPC gateway. This will multiplex or route request different gRPC service
+//	mux := runtime.NewServeMux()
+//	// setting up a dail up for gRPC service by specifying endpoint/target url
+//	err := gen.RegisterGreeterHandlerFromEndpoint(context.Background(), mux, "localhost:8080", []grpc.DialOption{grpc.WithInsecure()})
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	// Creating a normal HTTP server
+//	server := http.Server{
+//		Handler: mux,
+//	}
+//	// creating a listener for server
+//	l, err := net.Listen("tcp", ":8081")
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	// start server
+//	err = server.Serve(l)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//}
