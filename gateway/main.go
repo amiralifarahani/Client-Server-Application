@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	gen "gateway/main/gen/go"
+	gen "main/gen/go"
 	"log"
 	"net/http"
 	"strings"
